@@ -207,6 +207,24 @@ Splitting with an empty carrier set will transfer.</td>
 </tr>
 
 <tr>
+<td>drop</td>
+<td>N</td>
+<td>Synonym for "knit + N".</td>
+</tr>
+
+<tr>
+<td>amiss</td>
+<td>N</td>
+<td>Synonym for "tuck + N".</td>
+</tr>
+
+<tr>
+<td>xfer</td>
+<td>N N2</td>
+<td>Synonym for "split + N N2".</td>
+</tr>
+
+<tr>
 <td>miss</td>
 <td>D N CS</td>
 <td>Move the specified carriers as if they had just formed a loop in direction D at location N.
@@ -380,10 +398,9 @@ We expect that more frontend tools will be written than backend tools, and prefe
 The <code>miss</code> opcode allows frontend authors who wish to schedule their own kickbacks to do so.
 </p>
 <p><b>C:</b> Should the format support 'drop', 'amiss', and 'xfer'?</p>
-<p><b>R:</b> No.
-These are synonyms for 'knit', 'tuck', and 'split' with no yarns; on the other hand, they are expected and would certainly be provided by any interface.
-Supporting them makes files slightly easier to understand as humans.
-However, the additional parsing complexity is unlikely to be welcome.
+<p><b>R:</b> Yes.
+These are synonyms for 'knit', 'tuck', and 'split' with no yarns; which makes them redundant.
+On the other hand, they are expected and would certainly be provided by any interface; also, having these in the language avoids the weirdness of needing to specify a left/right direction for a transfer.
 </p>
 
 </body>
