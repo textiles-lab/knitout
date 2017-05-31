@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>The "Knitout" (.k) File Format</title>
+</head>
+<body>
+<h1>The "Knitout" (.k) File Format v0.4</h1>
+<p>
+Knitout (.k) is a file format that can represent low-level knitting machine instructions in a machine-independent way.
+The format is easy to read and write from code, and reasonably human-readable.
+It is hoped that knitout can serve as an output file format for design tools, and an input file format for knitting machines and simulators.
+</p>
+<p>Knitout has no relation to the custom sock vendor of the same name.</p>
+<p>
+The remainder of this document describes the format itself, the design principles behind the format, and ends with some comments about particular decisions.
+</p>
+<h2>History</h2>
+<ol>
+<li>Version 0.4 -- total re-write, placed in the public domain. (Jim McCann)</li>
+</ol>
+
+
+<h2>File Format</h2>
+<p>
+Knitout is a straightforward list of knitting instructions to execute to create a knit object, along with a header describing specific information about the machine it is designed to run on.
+</p>
+<h3>Extensions, Encoding, Line Endings</h3>
+<p>
+Knitout files are named with the <code>.k</code> extension.
+</p>
+<p>
+Knitout files contain UTF8-encoded text.
+</p>
+<p>
+Knitout is line-oriented, and knitout files use the LF character to terminate lines (<code>'\n'</code>, hex: <code>0xA</code>).
+</p>
+<p>
+Programs that write knitout format files should name then with a <code>.k</code> extension,
+encode them as UTF8,
+and use the LF character as a line ending.
+Programs that read knitout files should support files produced in this way, and may support other extensions, encodings, and line endings (though they should warn that the file is not standard).
+</p>
+<h3>Magic String</h3>
+<pre><code>
+;!knitout-2
+</pre></code>
+<p>
+Knitout files begin with a magic string <code>;!knitout-VERSION</code> followed by a linefeed.
+<code>VERSION</code> is an integer indicating the current version.
+The version number will be incremented when features are moved from extensions into the main language.
+</p>
+<p>
+Programs that write knitout should always use the latest version of which they are aware.
+Programs that read knitout must accept any version number, but should warn if the version is later than one they support.
+</p>
+<h3>Comment Header</h3>
+<pre><code>
+;;Machine: SWG091N2
+;;Gauge: 15
+;;Yarn-5: 50-50 Rust
+;;Carriers: 1 2 3 4 5 6 7 8 9 10
+;;Position: Right
+</code></pre>
+<p>
+After the magic string, knitout files contain a series of special comments (starting with <code>;;</code>) known as the "comment header."
+These comments give additional information about the machine intended to execute the knitout code in the file.
+</p>
+<p>
+Each comment header begins with header name, followed by the string ": ", followed by a header value.
+</p>
+<table>
+<tr>
+<th>Name</th><th>Value</th>
+<th>Meaning</th>
+</tr>
+
+<tr>
+<td>Machine</td><td>M</td>
+<td>the model name M of the target machine</td>
+</tr>
+
+<tr>
+<td>Gauge</td><td>G</td>
+<td>the gauge G (in needles/inch) of the target machine</td>
+</tr>
+
+<tr>
+<td>Carriers</td><td>C1 C2 C3 ...</td>
+<td>space-separated list of carrier names; carriers are given in front-to-back order</td>
+</tr>
+
+<tr>
+<td>Yarn-C</td><td>type color</td>
+<td>yarn to load in carrier C</td>
+</tr>
+
+<tr>
+<td>Position</td><td>P</td>
+<td>where to place the operations on the needle bed; Left, Center, Right, and Keep are standard values</td>
+</tr>
+
+<tr>
+<td>X-*</td><td>*</td>
+<td>extension header</td>
+</tr>
+
+</table>
+
+<h3>Operations</h3>
+<pre><code>knit + f14 A B ;knit together
+knit + f15 A B
+knit + f16 A B
+;note to self: maybe put in a tuck here?
+knit + f17 A
+knit + f18 A
+knit + f19 A
+</code></pre>
+<p>
+After the comment header, all lines in the file contain an (optional) operation followed by an (optional) comment.
+The operation is everything up to the first ';' character, the comment is everything after:
+</p>
+<pre><code>knit + f14 A B ;knit together
+^--operation--^ ^--comment--^
+
+knit + f14 A B
+^--operation-^ (no comment)
+
+;note to self
+ ^-comment--^ (no operation)
+</code></pre>
+<p>
+The operation is a whitespace-separated list of tokens.
+The first token is the opcode, and the remaining tokens [if any] are the parameters.
+</p>
+<table>
+<tr><th colspan="3">Opcodes</th></tr>
+<tr>
+<th>Opcode</th>
+<th>Parameters</th>
+<th>Description</th>
+</tr>
+
+<tr>
+<td>in</td>
+<td>CS</td>
+<td>Bring a set of carriers into action directly from the yarn grippers.</td>
+</tr>
+
+<tr>
+<td>inhook</td>
+<td>D N CS</td>
+<td>Bring a set of carriers into action, using a yarn inserting hook to bring their yarns from the grippers.
+Park the inserting hook just before needle N, as if one were about to knit it in direction D.
+Must by followed by a call to releasehook with the same carrier set.</td>
+</tr>
+
+<tr>
+<td>releasehook</td>
+<td>CS</td>
+<td>Release the yarns currently held in the yarn inserting hook.
+Must be proceeded by a call to inhook with the same carrier set.</td>
+</tr>
+
+<tr>
+<td>out</td>
+<td>CS</td>
+<td>Bring a set of carriers out of action directly moving into the grippers.</td>
+</tr>
+
+<tr>
+<td>outhook</td>
+<td>CS</td>
+<td>Bring a set of carriers out of action, using a yarn inserting hook to bring their yarns to the grippers.</td>
+</tr>
+
+<tr>
+<td>stitch</td>
+<td>L T</td>
+<td>Before forming a loop, pull needle by L machine units. After forming a loop, pull needle by T machine units.</td>
+</tr>
+
+<tr>
+<td>rack</td>
+<td>R</td>
+<td>Position the machine beds so that front position N is across back position N+R.</td>
+</tr>
+
+<tr>
+<td>knit</td>
+<td>D N CS</td>
+<td>Pull a loop formed in direction D by the yarns in carriers CS through the loops on needle N, dropping them in the process.
+Knitting with an empty carrier set will drop.</td>
+</tr>
+
+<tr>
+<td>tuck</td>
+<td>D N CS</td>
+<td>Add a loop formed in direction D by the yarns held by carriers in CS to those already on needle N.
+Tucking with an empty carrier set will pull on the stitches without doing anything else (an "a-miss").</td>
+</tr>
+
+<tr>
+<td>split</td>
+<td>D N N2 CS</td>
+<td>Pull a loop formed in direction D by the yarns in carriers CS through the loops on needle N, transferring the old loops to opposite-bed needle N2 in the process.
+Splitting with an empty carrier set will transfer.</td>
+</tr>
+
+<tr>
+<td>miss</td>
+<td>D N CS</td>
+<td>Move the specified carriers as if they had just formed a loop in direction D at location N.
+(Not generally needed, used when performing explicit kickbacks or purposeful yarn capture.)</td>
+</tr>
+
+<tr>
+<td>pause</td>
+<td></td>
+<td>Pause the machine until the operator enters a command to continue.
+(Not generally needed, but can be useful when, e.g., having the operator change yarns.)</td>
+</tr>
+
+<tr>
+<td>x-*</td>
+<td>*</td>
+<td>Extension opcode.
+</td>
+</tr>
+
+</table>
+
+<table>
+<tr><th colspan="4">Parameters</th></tr>
+<tr><th>Symbol</th><th>Examples</th><th>Name</th><th>Description</th></tr>
+
+<tr><td>D</td><td>"+", "-"</td>
+<td>Direction</td>
+<td>A direction on the machine bed. "+" indicates increasing needle number (typically, rightward movement), "-" indicates decreasing needle number (typically, leftward movement).</td>
+</tr>
+
+<tr><td>N</td><td>"f1", "b-2", "fs3"</td>
+<td>Needle</td>
+<td>A machine needle. Consists of a location prefix followed by a number. On a V-bed machine, needles are prefixed "f" and "b" for front and back. A V-bed with slide needles adds "fs" and "bs" for front and back sliders.</td>
+</tr>
+
+<tr><td>CS</td><td>"A B", "2", ""</td>
+<td>Carrier Set</td>
+<td>List of zero or more carrier names.</td>
+</tr>
+
+<tr><td>N</td><td>"f1", "b-2", "fs3"</td>
+<td>Needle</td>
+<td>A machine needle. Consists of a location prefix followed by a number. On a V-bed machine, needles are prefixed "f" and "b" for front and back. A V-bed with slide needles adds "fs" and "bs" for front and back sliders.</td>
+</tr>
+
+<tr><td>R</td><td>"4", "5.0", "2.25", "-1.75"</td>
+<td>Racking Value</td>
+<td>Number indicating an offset between needle beds (back - front). May be fractional on some machines. E.g., on Shima machines, 0.25/-0.75 are used for all-needle knitting.</td>
+</tr>
+
+</table>
+
+<h3>Extensions</h3>
+<p>Support for extending knitout is supplied through the extension headers namespace (X-*) and the extension opcode namespace (x-*).
+Programs that read knitout files should warn upon encountering an extension header or opcode they do not support; but should otherwise ignore the header or opcode.
+</p>
+
+<h2>Interpretation</h2>
+<p>Knitout operations are straightfoward to interpret when generating machine control code.
+However, knitout files don't provide any direct guidance on two important issues: carriage passes and kickbacks.
+</p>
+<h3>Carriage Passes</h3>
+<p>In general, backends should attempt to produce machine instructions that fabricate a given knitout file in as few passes as possible, with the constraint that the result must be "as if" the stitches and rackings were performed one-at-a-time in the order written.
+</p>
+<p>
+When writing knitout files, one should generally be assume that a backend will at least unify stitches into carriage passes, instead of performing each stitch in its own pass.
+Backends may go further, unifying stitches with different carriers on different parts of the bed into single passes, or using multiple knitting systems to perform multiple stitches on the same needle in a single pass.
+</p>
+<h3>Kickbacks</h3>
+<p>Kickbacks are misses performed to get yarn carriers out of the way of other operations.
+Knitout uses "implicit kickbacks" -- that is, kickbacks are not written into the knitout file directly, but are instead implied by other operations.
+Implicit kickbacks are always performed "as if" they happen just before they are needed.
+Backends may choose to perform them earlier if this would not influence the outcome of the construction process.
+</p>
+<pre><code>knit + f1 A
+xfer f2 b2 ;kickback: yarn from f1 to A would interfere
+
+knit + f10 B
+knit + f9 C ;no kickback, carrier from f10 is to the right
+knit + f11 C ;kickback: yarn from f10 to B would interfere
+</code></pre>
+<p>It is important to note that for the purposes of implicit kickbacks, backends should always treat yarns as if they are attached to the last stitch performed by the carrier, even if this stitch was a miss.
+This means one can use miss stitches to override or avoid implicit kickback behavior.
+</p>
+<pre><code>knit + f1 A
+miss + f2 A
+xfer f2 b2 ;not a kickback: yarn from f1 now considered to end to the right of f2
+
+knit + f1 A
+miss - f1 A
+xfer f2 b2 ;not a kickback: carrier parked left of f1
+</code></pre>
+
+<h2>Example File</h2>
+<p>
+This example file uses an alternating-tuck cast-on, followed by two rows of plain knitting, and drops instead of binding off.
+</p>
+<pre><code>;!knitout-2
+;;Machine: SWG091N2
+;;Gauge: 15
+;;Yarn-5: 50-50 Rust
+;;Carriers: 1 2 3 4 5 6 7 8 9 10
+;;Position: Right
+
+inhook - f10 5
+tuck - f10 5
+tuck - f8 5
+tuck - f6 5
+tuck - f4 5
+tuck - f2 5
+tuck - f0 5
+tuck + f1 5
+tuck + f3 5
+tuck + f5 5
+tuck + f7 5
+tuck + f9 5
+
+releasehook 5
+
+knit - f10 5
+knit - f9 5
+knit - f8 5
+knit - f7 5
+knit - f6 5
+knit - f5 5
+knit - f4 5
+knit - f3 5
+knit - f2 5
+knit - f1 5
+
+knit + f1 5
+knit + f2 5
+knit + f3 5
+knit + f4 5
+knit + f5 5
+knit + f6 5
+knit + f7 5
+knit + f8 5
+knit + f9 5
+knit + f10 5
+
+outhook 5
+</code></pre>
+
+<h2>Design Notes</h2>
+<p>
+This section provides notes on the thinking behind the design choices that went into knitout.
+</p>
+<h3>Design Principles</h3>
+<p>
+<b>Low-level.</b>
+The format is low-level. It contains no flow-control, abstractions, or grouping primitives.
+</p>
+<p>
+<b>Output-oriented.</b>
+Knitout contains exactly the instructions required to fabricate a knit object.
+</p>
+<p><b>Debug-able.</b>
+As an output language, it is important that instructions in a knitout file can be tied back to their source in design programs.
+Thus, if there is a problem in fabrication or simulation, an error can be reported with a reasonable source location.
+</p>
+<p><b>Easy to use.</b>
+It should be simple to write software that reads or writes knitout files.
+</p>
+<h3>Challenges and Resolutions</h3>
+<p><b>C:</b> Should we use implicit or explicit kickbacks?</p>
+<p><b>R:</b> Implicit.
+Explicit kickbacks make it easier to write a backend, but harder to write design tools, write knitout files by hand, or to interpret what knitout files are producing.
+We expect that more frontend tools will be written than backend tools, and prefer the clarity that comes from not having to constantly think about yarn capture when producing a knitout file.
+The <code>miss</code> opcode allows frontend authors who wish to schedule their own kickbacks to do so.
+</p>
+<p><b>C:</b> Should the format support 'drop', 'amiss', and 'xfer'?</p>
+<p><b>R:</b> No.
+These are synonyms for 'knit', 'tuck', and 'split' with no yarns; on the other hand, they are expected and would certainly be provided by any interface.
+Supporting them makes files slightly easier to understand as humans.
+However, the additional parsing complexity is unlikely to be welcome.
+</p>
+
+</body>
+</html>
+
