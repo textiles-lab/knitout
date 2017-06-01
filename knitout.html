@@ -148,10 +148,10 @@ The first token is the opcode, and the remaining tokens [if any] are the paramet
 
 <tr>
 <td>inhook</td>
-<td>D N CS</td>
+<td>CS</td>
 <td>Bring a set of carriers into action, using a yarn inserting hook to bring their yarns from the grippers.
-Park the inserting hook just before needle N, as if one were about to knit it in direction D.
-Must by followed by a call to releasehook with the same carrier set.</td>
+The inserting hook will be parked just before the first stitch made with the carriers.
+</td>
 </tr>
 
 <tr>
@@ -397,10 +397,20 @@ Explicit kickbacks make it easier to write a backend, but harder to write design
 We expect that more frontend tools will be written than backend tools, and prefer the clarity that comes from not having to constantly think about yarn capture when producing a knitout file.
 The <code>miss</code> opcode allows frontend authors who wish to schedule their own kickbacks to do so.
 </p>
+<p>
+It may make sense to introduce an extension header ";;X-Kickbacks: Explicit" to control this behavior.
+</p>
+
 <p><b>C:</b> Should the format support 'drop', 'amiss', and 'xfer'?</p>
 <p><b>R:</b> Yes.
 These are synonyms for 'knit', 'tuck', and 'split' with no yarns; which makes them redundant.
 On the other hand, they are expected and would certainly be provided by any interface; also, having these in the language avoids the weirdness of needing to specify a left/right direction for a transfer.
+</p>
+
+<p><b>C:</b> How to support the wide variety of takedown systems and features? (E.g. fabric presser, rollers, combs, segmented combs.)</p>
+<p><b>R:</b>
+For now, we leave this for extensions; if common themes begin to emerge, we will make the features core operations.
+We are likely to support an "x-presser on/auto/off" operation for the SWG backend.
 </p>
 
 </body>
