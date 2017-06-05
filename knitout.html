@@ -182,7 +182,7 @@ Must be proceeded by a call to inhook with the same carrier set.</td>
 <tr>
 <td>rack</td>
 <td>R</td>
-<td>Position the machine beds so that front position N is across back position N+R.</td>
+<td>Set the offset of the front bed relative to the back bed.</td>
 </tr>
 
 <tr>
@@ -273,7 +273,11 @@ Splitting with an empty carrier set will transfer.</td>
 
 <tr><td>R</td><td>"4", "5.0", "2.25", "-1.75"</td>
 <td>Racking Value</td>
-<td>Number indicating an offset between needle beds (back - front). May be fractional on some machines. E.g., on Shima machines, 0.25/-0.75 are used for all-needle knitting.</td>
+<td>Number indicating the offset of the front bed relative to the back bed.
+That is, at racking R, front needle index F is aligned to back needle index F+R.
+Needles are considered aligned if they can transfer.
+That is, at racking 2, it is possible to transfer from f1 to b3.
+May be fractional on some machines. E.g., on Shima machines, 0.25/-0.75 are used for all-needle knitting.</td>
 </tr>
 
 </table>
