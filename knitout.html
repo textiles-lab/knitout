@@ -143,13 +143,14 @@ The first token is the opcode, and the remaining tokens [if any] are the paramet
 <tr>
 <td>in</td>
 <td>CS</td>
-<td>Bring a set of carriers into action directly from the yarn grippers.</td>
+<td>Indicate that the given carrier set should be brought into action from the yarn grippers when next used.</td>
 </tr>
 
 <tr>
 <td>inhook</td>
 <td>CS</td>
-<td>Bring a set of carriers into action, using a yarn inserting hook to bring their yarns from the grippers.
+<td>
+Indicate that the given carrier set should be brought into action using the yarn inserting hook when next used.
 The inserting hook will be parked just before the first stitch made with the carriers.
 </td>
 </tr>
@@ -158,13 +159,13 @@ The inserting hook will be parked just before the first stitch made with the car
 <td>releasehook</td>
 <td>CS</td>
 <td>Release the yarns currently held in the yarn inserting hook.
-Must be proceeded by a call to inhook with the same carrier set.</td>
+Must be proceeded by a call to inhook with the same carrier set and at least one knitting operation.</td>
 </tr>
 
 <tr>
 <td>out</td>
 <td>CS</td>
-<td>Bring a set of carriers out of action directly moving into the grippers.</td>
+<td>Bring a set of carriers out of action by directly moving into the grippers.</td>
 </tr>
 
 <tr>
@@ -416,6 +417,33 @@ On the other hand, they are expected and would certainly be provided by any inte
 For now, we leave this for extensions; if common themes begin to emerge, we will make the features core operations.
 We are likely to support an "x-presser on/auto/off" operation for the SWG backend.
 </p>
+
+<p><b>C:</b> One generally can't bring a yarn into action without actually making a stitch with it. Should we combine 'in[hook]' and knitting instructions? Should we require that it be followed by a knitting instruction?</p>
+<p><b>R:</b>
+We considered, but rejected, several resolutions:
+</p>
+<ol>
+<li>
+Make 'in[hook]' a prefix to a knitting instruction (e.g. 'inhook knit + f2 A C').
+This seems to increase file parsing complexity.
+</li>
+<li>
+Require that 'in[hook]' always be immediately followed by a knitting instruction for the named yarns.
+This seems to increase file writing complexity, and perhaps file parsing complexity.
+</li>
+<li>
+Remove 'in[hook]', and have implicit yarn ins.
+This seems to make it easier to make errors in writing knitout files.
+</li>
+</ol>
+<p>
+Each of these possible resolutions seems to make it harder to read, write, or understand knitout files.
+Instead, we changed the language of the specification to make it clear that 'in[hook]' <em>marks</em> carriers to be inserted when next they are used, instead of inserting them directly.
+</p>
+<p>
+In addition, we suggest that programs that read knitout files should produce a warning if carriers are marked for inserting but not used for a long time.
+</p>
+
 
 </body>
 </html>
