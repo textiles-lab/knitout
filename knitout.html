@@ -18,7 +18,15 @@ The remainder of this document describes the format itself, the design principle
 <ol>
 <li>Version 0.4 -- total re-write, placed in the public domain. (Jim McCann)</li>
 </ol>
-
+<h2>Contributing</h2>
+<p>
+Please do not hesitate to get in touch with ideas, comments, or improvements for the specification.
+Without your input, knitout cannot grow into a useful specification.
+</p>
+<p>
+To provide feedback, use the <a href="https://github.com/textiles-lab/knitout/issues">Issues</a> page.
+You may also contact Jim McCann directly (see his <a href="http://www.cs.cmu.edu/~jmccann/">web page</a> for contact information).
+</p>
 
 <h2>File Format</h2>
 <p>
@@ -267,9 +275,10 @@ Splitting with an empty carrier set will transfer.</td>
 <td>List of zero or more carrier names.</td>
 </tr>
 
-<tr><td>N</td><td>"f1", "b-2", "fs3"</td>
-<td>Needle</td>
-<td>A machine needle. Consists of a location prefix followed by a number. On a V-bed machine, needles are prefixed "f" and "b" for front and back. A V-bed with slide needles adds "fs" and "bs" for front and back sliders.</td>
+<tr><td>L or T</td><td>"2", "-7.5", "30"</td>
+<td>Stitch Value</td>
+<td>A floating point number giving the number of machine units to retract a needle. Used with the "stitch" instruction.
+The meaning of a stitch value may vary between machines and manufacturers; be aware that negative stitch values <b>are</b> supported by at least one manufacturer.</td>
 </tr>
 
 <tr><td>R</td><td>"4", "5.0", "2.25", "-1.75"</td>
