@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Extensions for "Knitout" (.k)</title>
+</head>
+<style>
+ul.extensions {
+	display:flex;
+	flex-flow: column;
+	margin:0;
+	padding:0;
+}
+ul.extensions > li {
+	display:flex;
+	flex-flow: row;
+	align-items: flex-start;
+	margin: 0 0 1em 0;
+}
+ul.extensions > li > pre.tokens {
+	display:block;
+	background:#eee;
+	margin:0;
+	padding:3px 5px;
+	border-radius:5px;
+}
+ul.extensions > li > div.description {
+	margin:0 0 0 15px;
+	padding:0;
+}
+ul.extensions > li > div.description:first-line {
+	margin-left:-5px;
+}
+ul.extensions > li > div.description > span.title {
+	font-weight:bold;
+}
+</style>
+<body>
+<h1>Extensions for the "Knitout" (.k) File Format</h1>
+<p>
+This file contains a summary of the known extensions for the knitting output file format ("Knitout" / .k).
+If you have developed an extension and would like it to be included, please use the <a href="https://github.com/textiles-lab/knitout/issues">Issues</a> page,
+or send e-mail to the <a href="mailto:knitout-feedback@cs.cmu.edu">knitout-feedback@cs.cmu.edu</a> alias.
+</p>
+
+<ul class="extensions">
+<li>
+<pre class="tokens"><code>x-stitch-number 5
+</code></pre>
+<div class="description">
+<span class="title">Stitch Number</span> (<span class="author">CMU Textiles Lab</span>).
+The 'x-stitch-number' command sets the stitch number (an abstract index into a machine table of stitch and leading values).
+</div>
+</li>
+<li>
+<pre class="tokens"><code>x-speed-number 10
+</code></pre>
+<div class="description">
+<span class="title">Speed Number</span> (<span class="author">CMU Textiles Lab</span>).
+The 'x-speed-number' command sets the speed number (an abstract index into a machine table of speed values).
+Sets speed for both knitting and transfer passes. Valid speeds are 0-15.
+</div>
+</li>
+</ul>
+
+</body>
+</html>
+
