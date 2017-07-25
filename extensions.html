@@ -24,15 +24,23 @@ ul.extensions > li > pre.tokens {
 	border-radius:5px;
 }
 ul.extensions > li > div.description {
-	margin:0 0 0 15px;
+	margin:0 0 0 25px;
 	padding:0;
 }
-ul.extensions > li > div.description:first-line {
-	margin-left:-5px;
-}
+
 ul.extensions > li > div.description > span.title {
+	margin-left:-10px;
 	font-weight:bold;
 }
+
+ul.extensions > li > div.description > span.author {
+	color:#888;
+}
+
+ul.extensions > li > div.description > span.where {
+	color:#888;
+}
+
 </style>
 <body>
 <h1>Extensions for the "Knitout" (.k) File Format</h1>
@@ -47,7 +55,7 @@ or send e-mail to the <a href="mailto:knitout-feedback@cs.cmu.edu">knitout-feedb
 <pre class="tokens"><code>x-stitch-number 5
 </code></pre>
 <div class="description">
-<span class="title">Stitch Number</span> (<span class="author">CMU Textiles Lab</span>).
+<span class="title">Stitch Number</span> <span class="author">CMU Textiles Lab</span> / <span class="where">SWG*N2 Backend</span>.
 The 'x-stitch-number' command sets the stitch number (an abstract index into a machine table of stitch and leading values).
 </div>
 </li>
@@ -55,9 +63,9 @@ The 'x-stitch-number' command sets the stitch number (an abstract index into a m
 <pre class="tokens"><code>x-speed-number 10
 </code></pre>
 <div class="description">
-<span class="title">Speed Number</span> (<span class="author">CMU Textiles Lab</span>).
+<span class="title">Speed Number</span> <span class="author">CMU Textiles Lab</span> / <span class="where">SWG*N2 Backend</span>.
 The 'x-speed-number' command sets the speed number (an abstract index into a machine table of speed values).
-Sets speed for both knitting and transfer passes. Valid speeds are 0-15.
+Sets speed for both knitting and transfer passes. Valid speeds are 0-15.</br>
 </div>
 </li>
 </ul>
