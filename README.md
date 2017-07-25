@@ -1,6 +1,6 @@
 Knitout is a file format for representing low-level knitting instructions in a machine-independent way.
 
-The [specification](./knitout.html) documents the format.
+The [specification](https://textiles-lab.github.io/knitout/knitout.html) documents the format.
 
 The [extensions](./extensions.html) file is a list of known extensions.
 
