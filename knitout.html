@@ -45,8 +45,9 @@ Knitout is line-oriented, and knitout files use the LF character to terminate li
 <p>
 Programs that write knitout format files should name then with a <code>.k</code> extension,
 encode them as UTF8,
-and use the LF character as a line ending.
-Programs that read knitout files should support files produced in this way, and may support other extensions, encodings, and line endings (though they should warn that the file is not standard).
+use only the "space" (U+0020) and "tab" (U+0009) characters for whitespace,
+and use the LF character (U+000A) as a line ending.
+Programs that read knitout files should support files produced in this way, and may support other extensions, encodings, whitespace characters, and line endings (though they should warn that the file is not standard).
 </p>
 <h3>Magic String</h3>
 <pre><code>
@@ -74,7 +75,7 @@ After the magic string, knitout files contain a series of special comments (star
 These comments give additional information about the machine intended to execute the knitout code in the file.
 </p>
 <p>
-Each comment header begins with header name, followed by the string ": ", followed by a header value.
+Each comment header begins with string "<code>;;</code>", followed by the header name, followed by the string "<code>: </code>", followed by the header value.
 </p>
 <table>
 <tr>
@@ -138,6 +139,7 @@ knit + f14 A B
 </code></pre>
 <p>
 The operation is a whitespace-separated list of tokens.
+Leading and trailing whitespace may appear and is ignored.
 The first token is the opcode, and the remaining tokens [if any] are the parameters.
 </p>
 <table>
