@@ -2,6 +2,57 @@
 <html>
 <head>
 <title>The "Knitout" (.k) File Format</title>
+	<style type="text/css">
+		* {
+			/*outline: 1px solid red;*/
+		}
+		body {
+			padding: 0% 8%;
+			margin: 2em auto;
+			max-width: 50em;
+		}
+		pre {
+			outline: 1px solid #888;
+			background-color: #efefef;
+			display: block;
+			padding-left: 3em;
+			padding-top: 0.5em;
+			padding-bottom: 0.5em;
+			overflow: scroll;
+		}
+	
+		table {
+			border-spacing: 0px;
+			width:100%;
+			margin: 2em 0.5em;
+		}
+		tr {
+			width: 100%;
+		}
+		td {
+			padding: 0.5em 1.5em;
+			border-top: 1px solid #888;
+			border-width: 70%;
+			/*margin: 12px;*/
+		}
+		/*@media (max-width: 700px) {
+			body {
+				padding: 2em;
+			}
+		}*/
+		code op {
+			color: #d33682;
+		}
+		code par {
+			color: #268bd2;
+		}
+		code comment {
+			color: #444;
+		}
+		code clarification {
+			color: #859900;
+		}
+	</style>
 </head>
 <body>
 <h1>The "Knitout" (.k) File Format v0.4</h1>
@@ -50,8 +101,7 @@ and use the LF character (U+000A) as a line ending.
 Programs that read knitout files should support files produced in this way, and may support other extensions, encodings, whitespace characters, and line endings (though they should warn that the file is not standard).
 </p>
 <h3>Magic String</h3>
-<pre><code>
-;!knitout-2
+<pre><code>;!knitout-2
 </pre></code>
 <p>
 Knitout files begin with a magic string <code>;!knitout-VERSION</code> followed by a linefeed.
@@ -63,12 +113,11 @@ Programs that write knitout should always use the latest version of which they a
 Programs that read knitout must accept any version number, but should warn if the version is later than one they support.
 </p>
 <h3>Comment Header</h3>
-<pre><code>
-;;Machine: SWG091N2
+<pre><code><comment>;;Machine: SWG091N2
 ;;Gauge: 15
 ;;Yarn-5: 50-50 Rust
 ;;Carriers: 1 2 3 4 5 6 7 8 9 10
-;;Position: Right
+;;Position: Right</comment>
 </code></pre>
 <p>
 After the magic string, knitout files contain a series of special comments (starting with <code>;;</code>) known as the "comment header."
@@ -116,26 +165,26 @@ Each comment header begins with string "<code>;;</code>", followed by the header
 </table>
 
 <h3>Operations</h3>
-<pre><code>knit + f14 A B ;knit together
-knit + f15 A B
-knit + f16 A B
-;note to self: maybe put in a tuck here?
-knit + f17 A
-knit + f18 A
-knit + f19 A
+<pre><code><op>knit</op> <par>+ f14 A B</par> <comment>;knit together</comment>
+<op>knit</op> <par>+ f15 A B</par>
+<op>knit</op> <par>+ f16 A B</par>
+<comment>;note to self: maybe put in a tuck here?</comment>
+<op>knit</op> <par>+ f17 A</par>
+<op>knit</op> <par>+ f18 A</par>
+<op>knit</op> <par>+ f19 A</par>
 </code></pre>
 <p>
 After the comment header, all lines in the file contain an (optional) operation followed by an (optional) comment.
 The operation is everything up to the first ';' character, the comment is everything after:
 </p>
-<pre><code>knit + f14 A B ;knit together
-^--operation--^ ^--comment--^
+<pre><code><op>knit</op> <par>+ f14 A B</par> <comment>;knit together</comment>
+<clarification>^--operation--^ ^--comment--^</clarification>
 
-knit + f14 A B
-^--operation-^ (no comment)
+<op>knit</op> <par>+ f14 A B</par>
+<clarification>^--operation-^ (no comment)</clarification>
 
-;note to self
- ^-comment--^ (no operation)
+<comment>;note to self</comment>
+ <clarification>^-comment--^ (no operation)</clarification>
 </code></pre>
 <p>
 The operation is a whitespace-separated list of tokens.
@@ -143,7 +192,7 @@ Leading and trailing whitespace may appear and is ignored.
 The first token is the opcode, and the remaining tokens [if any] are the parameters.
 </p>
 <table>
-<tr><th colspan="3">Opcodes</th></tr>
+<tr><th colspan="3"><h3>Opcodes</h3></th></tr>
 <tr>
 <th>Opcode</th>
 <th>Parameters</th>
@@ -259,7 +308,7 @@ Splitting with an empty carrier set will transfer.</td>
 </table>
 
 <table>
-<tr><th colspan="4">Parameters</th></tr>
+<tr><th colspan="4"><h3>Parameters</h3></th></tr>
 <tr><th>Symbol</th><th>Examples</th><th>Name</th><th>Description</th></tr>
 
 <tr><td>D</td><td>"+", "-"</td>
@@ -316,74 +365,74 @@ Knitout uses "implicit kickbacks" -- that is, kickbacks are not written into the
 Implicit kickbacks are always performed "as if" they happen just before they are needed.
 Backends may choose to perform them earlier if this would not influence the outcome of the construction process.
 </p>
-<pre><code>knit + f1 A
-xfer f2 b2 ;kickback: yarn from f1 to A would interfere
-
-knit + f10 B
-knit + f9 C ;no kickback, carrier from f10 is to the right
-knit + f11 C ;kickback: yarn from f10 to B would interfere
+<pre><code><op>knit</op> <par>+ f1 A</par>
+<op>xfer</op> <par>f2 b2</par> <comment>;kickback: yarn from f1 to A would interfere</comment>
+ 
+<op>knit</op> <par>+ f10 B</par>
+<op>knit</op> <par>+ f9 C</par> <comment>;no kickback, carrier from f10 is to the right</comment>
+<op>knit</op> <par>+ f11 C</par> <comment>;kickback: yarn from f10 to B would interfere</comment>
 </code></pre>
 <p>It is important to note that for the purposes of implicit kickbacks, backends should always treat yarns as if they are attached to the last stitch performed by the carrier, even if this stitch was a miss.
 This means one can use miss stitches to override or avoid implicit kickback behavior.
 </p>
-<pre><code>knit + f1 A
-miss + f2 A
-xfer f2 b2 ;not a kickback: yarn from f1 now considered to end to the right of f2
+<pre><code><op>knit</op> <par>+ f1 A</par>
+<op>miss</op> <par>+ f2 A</par>
+<op>xfer</op> <par>f2 b2 </par><comment>;not a kickback: yarn from f1 now considered to end to the right of f2</comment>
 
-knit + f1 A
-miss - f1 A
-xfer f2 b2 ;not a kickback: carrier parked left of f1
+<op>knit</op> <par>+ f1 A</par>
+<op>miss</op> <par>- f1 A</par>
+<op>xfer</op> <par>f2 b2 </par><comment>;not a kickback: carrier parked left of f1</comment>
 </code></pre>
 
 <h2>Example File</h2>
 <p>
 This example file uses an alternating-tuck cast-on, followed by two rows of plain knitting, and drops instead of binding off.
 </p>
-<pre><code>;!knitout-2
-;;Machine: SWG091N2
-;;Gauge: 15
-;;Yarn-5: 50-50 Rust
-;;Carriers: 1 2 3 4 5 6 7 8 9 10
-;;Position: Right
+<pre><code><comment>;!knitout-2</comment>
+<comment>;;Machine: SWG091N2</comment>
+<comment>;;Gauge: 15</comment>
+<comment>;;Yarn-5: 50-50 Rust</comment>
+<comment>;;Carriers: 1 2 3 4 5 6 7 8 9 10</comment>
+<comment>;;Position: Right</comment>
 
-inhook - f10 5
-tuck - f10 5
-tuck - f8 5
-tuck - f6 5
-tuck - f4 5
-tuck - f2 5
-tuck - f0 5
-tuck + f1 5
-tuck + f3 5
-tuck + f5 5
-tuck + f7 5
-tuck + f9 5
+<op>inhook</op> <par>- f10 5</par>
+<op>tuck</op> <par>- f10 5</par>
+<op>tuck</op> <par>- f8 5</par>
+<op>tuck</op> <par>- f6 5</par>
+<op>tuck</op> <par>- f4 5</par>
+<op>tuck</op> <par>- f2 5</par>
+<op>tuck</op> <par>- f0 5</par>
+<op>tuck</op> <par>+ f1 5</par>
+<op>tuck</op> <par>+ f3 5</par>
+<op>tuck</op> <par>+ f5 5</par>
+<op>tuck</op> <par>+ f7 5</par>
+<op>tuck</op> <par>+ f9 5</par>
 
-releasehook 5
+<op>releasehook</op> <par>5</par>
 
-knit - f10 5
-knit - f9 5
-knit - f8 5
-knit - f7 5
-knit - f6 5
-knit - f5 5
-knit - f4 5
-knit - f3 5
-knit - f2 5
-knit - f1 5
+<op>knit</op> <par>- f10 5</par>
+<op>knit</op> <par>- f9 5</par>
+<op>knit</op> <par>- f8 5</par>
+<op>knit</op> <par>- f7 5</par>
+<op>knit</op> <par>- f6 5</par>
+<op>knit</op> <par>- f5 5</par>
+<op>knit</op> <par>- f4 5</par>
+<op>knit</op> <par>- f3 5</par>
+<op>knit</op> <par>- f2 5</par>
+<op>knit</op> <par>- f1 5</par>
 
-knit + f1 5
-knit + f2 5
-knit + f3 5
-knit + f4 5
-knit + f5 5
-knit + f6 5
-knit + f7 5
-knit + f8 5
-knit + f9 5
-knit + f10 5
+<op>knit</op> <par>+ f1 5</par>
+<op>knit</op> <par>+ f2 5</par>
+<op>knit</op> <par>+ f3 5</par>
+<op>knit</op> <par>+ f4 5</par>
+<op>knit</op> <par>+ f5 5</par>
+<op>knit</op> <par>+ f6 5</par>
+<op>knit</op> <par>+ f7 5</par>
+<op>knit</op> <par>+ f8 5</par>
+<op>knit</op> <par>+ f9 5</par>
+<op>knit</op> <par>+ f10 5</par>
 
-outhook 5
+<op>outhook</op> <par>5</par>
 </code></pre>
 
 <h2>Design Notes</h2>
