@@ -55,7 +55,7 @@
 	</style>
 </head>
 <body>
-<h1>The "Knitout" (.k) File Format v0.4</h1>
+<h1>The "Knitout" (.k) File Format v0.5</h1>
 <p>
 Knitout (.k) is a file format that can represent low-level knitting machine instructions in a machine-independent way.
 The format is easy to read and write from code, and reasonably human-readable.
@@ -67,6 +67,7 @@ The remainder of this document describes the format itself, the design principle
 </p>
 <h2>History</h2>
 <ol>
+<li>Version 0.5 -- racking sign swapped. (Jim McCann)</li>
 <li>Version 0.4 -- total re-write, placed in the public domain. (Jim McCann)</li>
 </ol>
 <h2>Contributing</h2>
@@ -242,7 +243,7 @@ Must be proceeded by a call to inhook with the same carrier set and at least one
 <tr>
 <td>rack</td>
 <td>R</td>
-<td>Set the offset of the front bed relative to the back bed.</td>
+<td>Set the offset of the back bed relative to the front bed.</td>
 </tr>
 
 <tr>
@@ -335,9 +336,9 @@ The meaning of a stitch value may vary between machines and manufacturers; be aw
 <tr><td>R</td><td>"4", "5.0", "2.25", "-1.75"</td>
 <td>Racking Value</td>
 <td>Number indicating the offset of the front bed relative to the back bed.
-That is, at racking R, front needle index F is aligned to back needle index F+R.
+That is, at racking R, back needle index B is aligned to front needle index B+R.
 Needles are considered aligned if they can transfer.
-That is, at racking 2, it is possible to transfer from f1 to b3.
+That is, at racking 2, it is possible to transfer from f3 to b1.
 May be fractional on some machines. E.g., on Shima machines, 0.25/-0.75 are used for all-needle knitting.</td>
 </tr>
 
@@ -503,6 +504,23 @@ Instead, we changed the language of the specification to make it clear that 'in[
 <p>
 In addition, we suggest that programs that read knitout files should produce a warning if carriers are marked for inserting but not used for a long time.
 </p>
+
+<p><b>C:</b> Should the back bed move left or right relative to the front bed for positive racking values?</p>
+<p><b>R:</b> Positive racking values move the back bed right.
+Here are two justifications, both of which are relatively weak:
+</p>
+<ul>
+<li>One way to indicate the racking would be to attach a pointer to the back bed and a scale to the front bed. (One wouldn't put the scale on the back bed because it is hard to see.)
+The selected convention means that the numbers on the scale are increasing left-to-right.
+</li>
+<li>
+When trying to align a front and back needle, "front index minus back index" seems like a natural order for subtraction.
+</li>
+</ul>
+<p>
+(However, in knitout 0.4, racking values worked the opposite way.)
+</p>
+
 
 
 </body>
