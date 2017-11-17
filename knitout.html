@@ -55,7 +55,7 @@
 	</style>
 </head>
 <body>
-<h1>The "Knitout" (.k) File Format v0.5</h1>
+<h1>The "Knitout" (.k) File Format v0.5.1</h1>
 <p>
 Knitout (.k) is a file format that can represent low-level knitting machine instructions in a machine-independent way.
 The format is easy to read and write from code, and reasonably human-readable.
@@ -67,6 +67,7 @@ The remainder of this document describes the format itself, the design principle
 </p>
 <h2>History</h2>
 <ol>
+<li>Version 0.5.1 -- add ;!source: comments, fix typo in example. (Jim McCann)</li>
 <li>Version 0.5 -- racking sign swapped. (Jim McCann)</li>
 <li>Version 0.4 -- total re-write, placed in the public domain. (Jim McCann)</li>
 </ol>
@@ -349,6 +350,16 @@ May be fractional on some machines. E.g., on Shima machines, 0.25/-0.75 are used
 Programs that read knitout files should warn upon encountering an extension header or opcode they do not support; but should otherwise ignore the header or opcode.
 </p>
 
+<h3>Source Comments</h3>
+<p>To aid in debugging, a special type of comment is provided that identifies the source code location corresponding to the current line in the knitout file.
+These "source comments" always begin with the string "<code>!source: </code>". Anything after this is considered the source location.
+</p>
+<p>Tools that parse knitout files should make no assumptions about the format of source locations, and should print source information intact when reporting errors.
+</p>
+<pre><code><op>knit</op> <par>+ f1 A</par> <comment>;!source: knit.js:53</comment>
+<op>knit</op> <par>+ f2 A</par> <comment>;!source: helper.cpp -- do_knit().2</comment></code></pre>
+
+
 <h2>Interpretation</h2>
 <p>Knitout operations are straightfoward to interpret when generating machine control code.
 However, knitout files don't provide any direct guidance on two important issues: carriage passes and kickbacks.
@@ -396,7 +407,8 @@ This example file uses an alternating-tuck cast-on, followed by two rows of plai
 <comment>;;Carriers: 1 2 3 4 5 6 7 8 9 10</comment>
 <comment>;;Position: Right</comment>
 
-<op>inhook</op> <par>- f10 5</par>
+<op>inhook</op> <par>5</par>
+
 <op>tuck</op> <par>- f10 5</par>
 <op>tuck</op> <par>- f8 5</par>
 <op>tuck</op> <par>- f6 5</par>
