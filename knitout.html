@@ -55,7 +55,7 @@
 	</style>
 </head>
 <body>
-<h1>The "Knitout" (.k) File Format v0.5.1</h1>
+<h1>The "Knitout" (.k) File Format v0.5.2</h1>
 <p>
 Knitout (.k) is a file format that can represent low-level knitting machine instructions in a machine-independent way.
 The format is easy to read and write from code, and reasonably human-readable.
@@ -67,6 +67,7 @@ The remainder of this document describes the format itself, the design principle
 </p>
 <h2>History</h2>
 <ol>
+<li>Version 0.5.2 -- clarify that ;;Carriers header is required. (Jim McCann)</li>
 <li>Version 0.5.1 -- add ;!source: comments, fix typo in example. (Jim McCann)</li>
 <li>Version 0.5 -- racking sign swapped. (Jim McCann)</li>
 <li>Version 0.4 -- total re-write, placed in the public domain. (Jim McCann)</li>
@@ -128,6 +129,40 @@ These comments give additional information about the machine intended to execute
 <p>
 Each comment header begins with string "<code>;;</code>", followed by the header name, followed by the string "<code>: </code>", followed by the header value.
 </p>
+
+<h4>Required Headers</h4>
+
+<p>
+The following headers are required because their values influence the topology of the finished knit item:
+</p>
+
+<table>
+<tr>
+<th>Name</th><th>Value</th>
+<th>Meaning</th>
+</tr>
+
+<tr>
+<td>Carriers</td><td>C1 C2 C3 ...</td>
+<td>space-separated list of carrier names; carriers are given in front-to-back order. Note that these names can be any string; knitout backends are expected to map these strings to machine carriers.
+
+</td>
+</tr>
+
+</table>
+
+<p>
+Tools that write knitout <em>must</em> include a <code>Carriers</code> header;
+tools that read knitout must warn if a <code>Carriers</code> header is missing, though they may also continue to process the file.
+</p>
+
+
+<h4>Other Headers</h4>
+
+<p>
+The following headers are optional:
+</p>
+
 <table>
 <tr>
 <th>Name</th><th>Value</th>
@@ -142,11 +177,6 @@ Each comment header begins with string "<code>;;</code>", followed by the header
 <tr>
 <td>Gauge</td><td>G</td>
 <td>the gauge G (in needles/inch) of the target machine</td>
-</tr>
-
-<tr>
-<td>Carriers</td><td>C1 C2 C3 ...</td>
-<td>space-separated list of carrier names; carriers are given in front-to-back order</td>
 </tr>
 
 <tr>
