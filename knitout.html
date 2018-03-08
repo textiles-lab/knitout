@@ -55,7 +55,7 @@
 	</style>
 </head>
 <body>
-<h1>The "Knitout" (.k) File Format v0.5.2</h1>
+<h1>The "Knitout" (.k) File Format v0.5.3</h1>
 <p>
 Knitout (.k) is a file format that can represent low-level knitting machine instructions in a machine-independent way.
 The format is easy to read and write from code, and reasonably human-readable.
@@ -67,6 +67,7 @@ The remainder of this document describes the format itself, the design principle
 </p>
 <h2>History</h2>
 <ol>
+<li>Version 0.5.3 -- clarify that carrier names are strings. (Jim McCann)</li>
 <li>Version 0.5.2 -- clarify that ;;Carriers header is required. (Jim McCann)</li>
 <li>Version 0.5.1 -- add ;!source: comments, fix typo in example. (Jim McCann)</li>
 <li>Version 0.5 -- racking sign swapped. (Jim McCann)</li>
@@ -355,7 +356,7 @@ Splitting with an empty carrier set will transfer.</td>
 
 <tr><td>CS</td><td>"A B", "2", ""</td>
 <td>Carrier Set</td>
-<td>List of zero or more carrier names.</td>
+<td>List of zero or more carrier names. Carrier names are strings that do not contain the ' ' (space) character.</td>
 </tr>
 
 <tr><td>L or T</td><td>"2", "-7.5", "30"</td>
