@@ -11,15 +11,27 @@
 			margin: 2em auto;
 			max-width: 50em;
 		}
+		code {
+			background-color: #efefef;
+			padding: 1px 2px;
+			border-radius: 2px;
+			border: 1px solid #888;
+		}
 		pre {
 			outline: 1px solid #888;
 			background-color: #efefef;
 			display: block;
-			padding-left: 3em;
-			padding-top: 0.5em;
-			padding-bottom: 0.5em;
+			margin: 0.5em 2em ;
+			padding: 0.5em 0.5em 0.5em 0.5em;
 			overflow: scroll;
 		}
+		pre > code {
+			background-color:none;
+			padding:0;
+			border-radius:0;
+			border:none;
+		}
+
 	
 		table {
 			border-spacing: 0px;
@@ -55,7 +67,7 @@
 	</style>
 </head>
 <body>
-<h1>The "Knitout" (.k) File Format v0.5.3</h1>
+<h1>The "Knitout" (.k) File Format v0.5.4</h1>
 <p>
 Knitout (.k) is a file format that can represent low-level knitting machine instructions in a machine-independent way.
 The format is easy to read and write from code, and reasonably human-readable.
@@ -67,6 +79,7 @@ The remainder of this document describes the format itself, the design principle
 </p>
 <h2>History</h2>
 <ol>
+<li>Version 0.5.4 -- clarify kickbacks, clarify wording in other sections, adjust CSS style. (Jim McCann)</li>
 <li>Version 0.5.3 -- clarify that carrier names are strings. (Jim McCann)</li>
 <li>Version 0.5.2 -- clarify that ;;Carriers header is required. (Jim McCann)</li>
 <li>Version 0.5.1 -- add ;!source: comments, fix typo in example. (Jim McCann)</li>
@@ -87,7 +100,7 @@ You may also contact the authors directly using the <a href="mailto:knitout-feed
 <p>
 Knitout is a straightforward list of knitting instructions to execute to create a knit object, along with a header describing specific information about the machine it is designed to run on.
 </p>
-<h3>Extensions, Encoding, Line Endings</h3>
+<h3>Filenames, Encoding, Line Endings</h3>
 <p>
 Knitout files are named with the <code>.k</code> extension.
 </p>
@@ -95,7 +108,7 @@ Knitout files are named with the <code>.k</code> extension.
 Knitout files contain UTF8-encoded text.
 </p>
 <p>
-Knitout is line-oriented, and knitout files use the LF character to terminate lines (<code>'\n'</code>, hex: <code>0xA</code>).
+Knitout is line-oriented, and knitout files use the LF character to terminate lines (<code>'\n'</code>, U+000A).
 </p>
 <p>
 Programs that write knitout format files should name then with a <code>.k</code> extension,
@@ -128,7 +141,7 @@ After the magic string, knitout files contain a series of special comments (star
 These comments give additional information about the machine intended to execute the knitout code in the file.
 </p>
 <p>
-Each comment header begins with string "<code>;;</code>", followed by the header name, followed by the string "<code>: </code>", followed by the header value.
+Each line in the comment header begins with the string "<code>;;</code>", followed by the header name, followed by the string "<code>: </code>", followed by the header value.
 </p>
 
 <h4>Required Headers</h4>
@@ -377,7 +390,7 @@ May be fractional on some machines. E.g., on Shima machines, 0.25/-0.75 are used
 </table>
 
 <h3>Extensions</h3>
-<p>Support for extending knitout is supplied through the extension headers namespace (X-*) and the extension opcode namespace (x-*).
+<p>Support for extending knitout is supplied through the extension headers namespace (<code>X-*</code>) and the extension opcode namespace (<code>x-*</code>).
 Programs that read knitout files should warn upon encountering an extension header or opcode they do not support; but should otherwise ignore the header or opcode.
 </p>
 
@@ -403,28 +416,64 @@ When writing knitout files, one should generally be assume that a backend will a
 Backends may go further, unifying stitches with different carriers on different parts of the bed into single passes, or using multiple knitting systems to perform multiple stitches on the same needle in a single pass.
 </p>
 <h3>Kickbacks</h3>
-<p>Kickbacks are misses performed to get yarn carriers out of the way of other operations.
-Knitout uses "implicit kickbacks" -- that is, kickbacks are not written into the knitout file directly, but are instead implied by other operations.
-Implicit kickbacks are always performed "as if" they happen just before they are needed.
-Backends may choose to perform them earlier if this would not influence the outcome of the construction process.
+<p>When interpreting knitout files, implementations should maintain a <em>logical position</em> for each yarn carrier that is currently in action.
+The logical position of a carrier is set and updated by needle operations involving the carrier or the needle to which its logical position is associated.
 </p>
-<pre><code><op>knit</op> <par>+ f1 A</par>
-<op>xfer</op> <par>f2 b2</par> <comment>;kickback: yarn from f1 to A would interfere</comment>
- 
-<op>knit</op> <par>+ f10 B</par>
-<op>knit</op> <par>+ f9 C</par> <comment>;no kickback, carrier from f10 is to the right</comment>
-<op>knit</op> <par>+ f11 C</par> <comment>;kickback: yarn from f10 to B would interfere</comment>
+<p>
+In practice -- owing to things like yarn carrier stopping distances -- the <em>physical</em> position of a yarn carrier is often different from its logical position.
+A knitout interpreter must add yarn carrier motions (called "kickbacks" in manual knit programming) to ensure that any differences between the physical and logical positions of yarn carriers are not observable in the finished knit.
+We call these "implicit kickbacks" and -- among other things -- they make knitout much easier to write colorwork with.
+</p>
+<p>
+Carrier logical positions are infinitesimally left or right of a needle, which -- for the purposes of this discussion -- we will write by appending a <code>+</code> or <code>-</code> to a needle or slider name.
+So, for instance, the position just to the right of needle <code>f3</code> will be written <code>f3+</code>.
+This is the same position as <code>fs3+</code>, but keeping them distinguished is sensible because of the way loop tracking works.
+</p>
+<h4>Update rules</h4>
+<ol>
+<li><b>Set:</b> After <code>tuck D N CS</code>, <code>knit D N CS</code>, <code>split D N N2 CS</code>, or <code>miss D N CS</code>, the logical position of each carrier in <code>CS</code> is set to <code>ND</code>.
+</li>
+<li><b>Motion:</b> After <code>split D N N2 CS</code> or <code>xfer N N2</code>, the logical position of any carrier <em>not in <code>CS</code></em> that has logical position <code>N+</code> is updated to have position <code>N2+</code>, and similarly for <code>N-</code> and <code>N2-</code>.
+</li>
+</ol>
+<h4>Examples</h4>
+<p>The "set" rule:</p>
+<pre><code><op>knit</op> <par>+ f-3 A</par>    <comment>;A has logical position f-3+</comment>
+<op>tuck</op> <par>- b2 C D</par>   <comment>;C and D have logical position b2-</comment>
+<op>split</op> <par>+ f3 b3 B</par> <comment>;B has logical position f3+</comment>
+<op>miss</op> <par>- bs10 E</par>   <comment>;E has logical position bs10-</comment>
 </code></pre>
-<p>It is important to note that for the purposes of implicit kickbacks, backends should always treat yarns as if they are attached to the last stitch performed by the carrier, even if this stitch was a miss.
-This means one can use miss stitches to override or avoid implicit kickback behavior.
-</p>
-<pre><code><op>knit</op> <par>+ f1 A</par>
-<op>miss</op> <par>+ f2 A</par>
-<op>xfer</op> <par>f2 b2 </par><comment>;not a kickback: yarn from f1 now considered to end to the right of f2</comment>
 
-<op>knit</op> <par>+ f1 A</par>
-<op>miss</op> <par>- f1 A</par>
-<op>xfer</op> <par>f2 b2 </par><comment>;not a kickback: carrier parked left of f1</comment>
+<p>The "motion" rule:</p>
+<pre><code><op>knit</op> <par>+ f3 X</par>      <comment>;X has logical position f3+</comment>
+<op>xfer</op> <par>f3 b3</par>       <comment>;X has logical position b3+</comment>
+<op>split</op> <par>- b3 fs3 Y</par> <comment>;X has logical position fs3+, Y has logical position b3-</comment>
+<op>rack</op> <par>-1</par>          <comment>;logical positions unchanged</comment>
+<op>xfer</op> <par>fs3 b4</par>      <comment>;X has logical position b4+</comment>
+</code></pre>
+
+<p>Basic example:</p>
+<pre><code><op>knit</op> <par>+ f1 A</par> <comment>;A has logical position f1+, physical position is likely further right</comment>
+<op>xfer</op> <par>f2 b2</par>  <comment>;A should be kicked left; yarn from f1+ to A's physical position would interfere</comment>
+ 
+<op>knit</op> <par>+ f10 B</par> <comment>;B has logical position f10+, physical position is likely further right</comment>
+<op>knit</op> <par>+ f9  C</par> <comment>;no kickback needed</comment>
+<op>knit</op> <par>+ f11 C</par> <comment>;kickback needed: yarn from f10+ to B's physical position would interfere</comment>
+</code></pre>
+<p>
+Using the <code>miss</code> operation to override implicit kickback behavior:
+</p>
+<pre><code><op>knit</op> <par>+ f1 A</par> <comment>;A has logical position f1+</comment>
+<op>miss</op> <par>+ f2 A</par> <comment>;A's logical position set to f2+</comment>
+<op>xfer</op> <par>f2 b2</par>  <comment>;A should be kicked right (or not at all)</comment>
+</code></pre>
+
+<p>
+Direction matters:
+</p>
+<pre><code><op>knit</op> <par>+ f1 A</par> <comment>;A has logical position f1+, physical position is likely further right</comment>
+<op>miss</op> <par>- f1 A</par> <comment>;A has logical position f1-, physical position is likely further left</comment>
+<op>xfer</op> <par>f2 b2 </par> <comment>;no kickback needed: yarn from f1- to A's physical position is not in the way</comment>
 </code></pre>
 
 <h2>Example File</h2>
