@@ -70,9 +70,19 @@ The 'x-stitch-number' command sets the stitch number (an abstract index into a m
 <div class="description">
 <span class="title">Speed Number</span> <span class="author">CMU Textiles Lab</span> / <span class="where">SWG*N2 Backend</span>.
 The 'x-speed-number' command sets the speed number (an abstract index into a machine table of speed values).
-Sets speed for both knitting and transfer passes. Valid speeds are 0-15.</br>
+Sets speed for both knitting and transfer passes. Valid speeds are 0 (default) or 1-15.</br>
 </div>
 </li>
+<li>
+<pre class="tokens"><code>x-sub-roller-number 3
+</code></pre>
+<div class="description">
+<span class="title">Sub-Roller Number</span> <span class="author">CMU Textiles Lab</span> / <span class="where">SWG*N2 Backend</span>.
+The 'x-sub-roller-number' command sets the sub roller table number (an index into a machine table of sub roller settings).
+Sets speed for only knitting passes. Valid speeds are 0 (default) or 1-31.</br>
+</div>
+</li>
+
 <li>
 <pre class="tokens"><code>x-presser-mode auto
 </code></pre>
