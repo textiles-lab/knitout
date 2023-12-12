@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
+<meta charset="utf-8">
 <title>The "Knitout" (.k) File Format</title>
-	<style type="text/css">
+	<style>
 		* {
 			/*outline: 1px solid red;*/
 		}
@@ -12,21 +13,21 @@
 			max-width: 50em;
 		}
 		code {
-			background-color: #efefef;
+			background: #efefef;
 			padding: 1px 2px;
 			border-radius: 2px;
 			border: 1px solid #888;
 		}
 		pre {
 			outline: 1px solid #888;
-			background-color: #efefef;
+			background: #efefef;
 			display: block;
 			margin: 0.5em 2em ;
 			padding: 0.5em 0.5em 0.5em 0.5em;
 			overflow: scroll;
 		}
 		pre > code {
-			background-color:none;
+			background:none;
 			padding:0;
 			border-radius:0;
 			border:none;
@@ -44,7 +45,6 @@
 		td {
 			padding: 0.5em 1.5em;
 			border-top: 1px solid #888;
-			border-width: 70%;
 			/*margin: 12px;*/
 		}
 		/*@media (max-width: 700px) {
@@ -79,6 +79,7 @@ The remainder of this document describes the format itself, the design principle
 </p>
 <h2>History</h2>
 <ol>
+<li>Version 0.6 -- carriers header and naming requirements. (Jim McCann)</li>
 <li>Version 0.5.4 -- clarify kickbacks, clarify wording in other sections, adjust CSS style. (Jim McCann)</li>
 <li>Version 0.5.3 -- clarify that carrier names are strings. (Jim McCann)</li>
 <li>Version 0.5.2 -- clarify that ;;Carriers header is required. (Jim McCann)</li>
@@ -119,7 +120,7 @@ Programs that read knitout files should support files produced in this way, and 
 </p>
 <h3>Magic String</h3>
 <pre><code>;!knitout-2
-</pre></code>
+</code></pre>
 <p>
 Knitout files begin with a magic string <code>;!knitout-VERSION</code> followed by a linefeed.
 <code>VERSION</code> is an integer indicating the current version.
@@ -157,9 +158,12 @@ The following headers are required because their values influence the topology o
 </tr>
 
 <tr>
-<td>Carriers</td><td>C1 C2 C3 ...</td>
-<td>space-separated list of carrier names; carriers are given in front-to-back order. Note that these names can be any string; knitout backends are expected to map these strings to machine carriers.
-
+<td>Carriers</td><td>C1 C2,C3;C4 C5 ...</td>
+<td>Carrier layout.
+A space-separated list of rail definitions (front-to-back).
+For machines with one carrier per rail, each rail definition is a single carrier name.
+For machines that support multiple carriers on a rail, each rail definition is a comma-separated list of names in left-to-right order with a semicolon dividing the left-side and right-side carriers (e.g., <code>L1,L2,L3;R1,R2</code>).
+Knitout backends may be more strict in carrier header requirements (including requiring an exact string for the carriers header).
 </td>
 </tr>
 
@@ -238,7 +242,7 @@ Leading and trailing whitespace may appear and is ignored.
 The first token is the opcode, and the remaining tokens [if any] are the parameters.
 </p>
 <table>
-<tr><th colspan="3"><h3>Opcodes</h3></th></tr>
+<tr><th colspan="3">Opcodes</th></tr>
 <tr>
 <th>Opcode</th>
 <th>Parameters</th>
@@ -354,7 +358,7 @@ Splitting with an empty carrier set will transfer.</td>
 </table>
 
 <table>
-<tr><th colspan="4"><h3>Parameters</h3></th></tr>
+<tr><th colspan="4">Parameters</th></tr>
 <tr><th>Symbol</th><th>Examples</th><th>Name</th><th>Description</th></tr>
 
 <tr><td>D</td><td>"+", "-"</td>
@@ -369,7 +373,10 @@ Splitting with an empty carrier set will transfer.</td>
 
 <tr><td>CS</td><td>"A B", "2", ""</td>
 <td>Carrier Set</td>
-<td>List of zero or more carrier names. Carrier names are strings that do not contain the ' ' (space) character.</td>
+<td>List of zero or more carrier names.
+Carrier names are strings that do not contain the <code>' '</code> (space), <code>','</code> (comma), or <code>';'</code> (semicolon) character.
+Backends may impose further requirements.
+</td>
 </tr>
 
 <tr><td>L or T</td><td>"2", "-7.5", "30"</td>
